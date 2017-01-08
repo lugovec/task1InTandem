@@ -1,6 +1,7 @@
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +12,11 @@ import java.util.regex.Pattern;
  */
 class StringComparator implements Comparator<String> {
 
+    /*Здесь переопределяется метод compare. Может быть три случая:
+    1) Одна из строк null, тогда отрабатывает метод nullComparator(string1, string2)
+    2) Одна из строк пустая, тогда отработает метод  emptyStringComparator(string1, string2)
+    3) Обе строки не null и не пустые, тогда отработатет метод splitStringComparator(string1, string2),
+        в котором строки разобьются на подстроки, которые и будут сравниваться*/
     @Override
     public int compare(final String string1, final String string2) {
 
@@ -73,10 +79,32 @@ class StringComparator implements Comparator<String> {
     private int splitStringComparator(final String string1, final String string2){
 
         /*Разбиваем строки на подстроки с помощью метода splitter*/
-        ListIterator<String> iterator1 = splitter(string1).listIterator();
-        ListIterator<String> iterator2 = splitter(string2).listIterator();
+        Iterator<String> iterator1 = splitter(string1).iterator();
+        Iterator<String> iterator2 = splitter(string2).iterator();
 
-        if (isNumber(string1))
+        while (iterator1.hasNext() && iterator2.hasNext()) {
+
+            String substring1 = iterator1.next();
+            String substring2 = iterator2.next();
+
+            /*Если обе подстроки являются числами, то преобразуем подстроки в числа
+                    и переменной result присваиваем результат сравнения. Если числа
+                    равны то сравниваем следующие подстроки, если нет, то прекращаем цикл
+                    и возвращаем результат*/
+            if (isNumber(substring1) && isNumber(substring2)){
+                int result = (new Integer(substring1)).compareTo(new Integer(substring2));
+                    if (result != 0) return result;
+            }
+
+            /*Здесь подстроки сравниваются как строки, если они раны, идём дальше,
+                иначе - прекращаем сравнение и возвращаем результат*/
+            int result = substring1.compareTo(substring2);
+                if (result != 0) return result;
+
+        }
+
+        /*Если подстроки равны, то та строка меньше, у которой меньше длина*/
+        return string1.length() - string2.length();
 
 
     }
